@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        body,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        ul,
+        li,
+        div,
+        p {
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            overflow: hidden;
+        }
+
+        .container {
+            height: 100%;
+        }
+
+        .container div {
+            position: relative;
+            height: 100%;
+        }
+
+        .one {
+            background-color: skyblue;
+        }
+
+        .two {
+            background-color: pink;
+        }
+
+        .three {
+            background-color: sienna;
+        }
+
+        .four {
+            background-color: green;
+        }
+
+        .active p {
+            transform: translate(300px)
+        }
+
+        p {
+            transition: all .5s ease-in;
+            transform: translate(-300px)
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="one">
+            <p>这是第一页</p>
+        </div>
+        <div class="two">
+            <p>这是第二页</p>
+        </div>
+        <div class="three">
+            <p>这是第三页</p>
+        </div>
+        <div class="four">
+            <p>这是第四页</p>
+        </div>
+    </div>
+</body>
+<script>
+    function Move() {
+        this.currIdx = 0;
+        this.pages = null;
+        this.pagesIdx = null;
+        this.container = null;
+        this.flag = false;//是否正在翻页，如果已经在翻页，则滚轮事件不执行
+        this.adjustWindow = function () {
+            for (let i = 0; i < this.pageIdx; i++) {
+                this.pages[i].style.height = window.innerHeight + 'px';
+            }
+            this.container.style.transform = 'translate(0,-' + this.currIdx * window.innerHeight + 'px)'
+        }
+        this.movePage = function (direct) {
+            if (!this.flag) {
+                if (direct > 0 && this.currIdx > 0) {
+                    this.pages[this.currIdx].classList.remove('active')
+                    this.currIdx--
+                } else if (direct < 0 && this.currIdx < this.pagesIdx - 1) {
+                    this.pages[this.currIdx].classList.remove('active')
+                    this.currIdx++
+                } else {
+                    return false
+                }
+                this.flag = true;
+                this.container.style.transition = 'all .5s ease-in'
+                this.container.style.transform = 'translate(0,-' + this.currIdx * window.innerHeight + 'px)'
+            }
+        }
+        this.init = function () {
+            let _this = this;
+            this.pages = document.querySelectorAll('.container div');
+            this.pagesIdx = this.pages.length;
+            this.container = document.querySelector('.container');
+            document.body.onresize = function () {
+                _this.adjustWindow()
+            }
+            document.onmousewheel = function (e) {
+                _this.movePage(e.wheelDelta)
+            }
+            this.container.addEventListener('transitionend', function (e) {
+                //这里阻止子内容的过渡结束事件影响
+                if (e.target === _this.container) {
+                    _this.pages[_this.currIdx].classList.add('active')
+                    _this.flag = false;
+                    this.style.transitionDuration = '0s'
+                }
+            })
+            setTimeout(() => this.pages[0].classList.add('active'), 0)
+        }
+        this.init()
+    }
+    let pagesItem = new Move();
+</script>
+
+</html>
